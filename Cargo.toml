@@ -1,0 +1,12 @@
+[package]
+name = "splendor-ai"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+anyhow = "1.0.92"
+clap = { version = "4.5.20", features = ["derive"] }
+clap-repl = "0.3.0"
+enum-map = { version = "2.7.3", features = ["serde"] }
+serde = "1.0.214"
+serde_json = "1.0.132"
