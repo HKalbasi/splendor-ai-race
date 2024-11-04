@@ -1,16 +1,11 @@
 [package]
-name = "splendor-ai"
+name = "game-def"
 version = "0.1.0"
 edition = "2021"
 
-[workspace]
-members = [
-    "random-agent",
-    "game-def",
-]
-
 [dependencies]
-game-def = { path = "./game-def" }
+anyhow = "1.0.92"
+clap = { version = "4.5.20", features = ["derive"] }
 enum-map = { version = "2.7.3", features = ["serde"] }
-clap-repl = "0.3.0"
+serde = "1.0.214"
 serde_json = "1.0.132"
