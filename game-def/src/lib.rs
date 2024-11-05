@@ -12,9 +12,22 @@ use serde::{Deserialize, Serialize};
 pub enum ResourceKind {
     Red,
     Blue,
-    Yellow,
+    Green,
     White,
-    Brown,
+    Black,
+}
+
+impl ResourceKind {
+    fn from_code(code: &str) -> Self {
+        match code {
+            "g" => ResourceKind::Green,
+            "r" => ResourceKind::Red,
+            "w" => ResourceKind::White,
+            "k" => ResourceKind::Black,
+            "u" => ResourceKind::Blue,
+            _ => unreachable!(),
+        }
+    }
 }
 
 #[derive(Clone, Serialize, Deserialize)]
@@ -38,9 +51,9 @@ impl ResourceMap {
         ResourceMap(enum_map! {
             ResourceKind::Red => 0,
             ResourceKind::Blue => 0,
-            ResourceKind::Yellow => 0,
+            ResourceKind::Green => 0,
             ResourceKind::White => 0,
-            ResourceKind::Brown => 0,
+            ResourceKind::Black => 0,
         })
     }
 
@@ -48,6 +61,19 @@ impl ResourceMap {
         for (r, x) in &adds.0 {
             self.0[r] += *x;
         }
+    }
+
+    pub fn from_code(code: &str) -> Self {
+        let mut this = Self::new();
+        for c in code.split("+") {
+            let (num, color) = c.split_at(1);
+            this.0[ResourceKind::from_code(color)] = num.parse().unwrap();
+        }
+        this
+    }
+    
+    pub fn sum(&self) -> i32 {
+        self.0.iter().map(|x| *x.1 as i32).sum()
     }
 }
 
@@ -152,6 +178,14 @@ pub struct State {
 const MAX_DECK_SHOW: usize = 4;
 
 impl State {
+    pub fn is_finished(&self) -> bool {
+        self.turn == 0 && self.players.iter().any(|x| x.score > 14)
+    }
+
+    pub fn winner(&self) -> usize {
+        self.players.iter().enumerate().max_by_key(|x| x.1.score).unwrap().0
+    }
+
     pub fn run(&mut self, action: Action) -> anyhow::Result<()> {
         let player = &mut self.players[self.turn];
         match action {
@@ -282,16 +316,16 @@ impl State {
     ) -> impl Iterator<Item = (ResourceKind, ResourceKind, ResourceKind)> + '_ {
         use ResourceKind::*;
         const CANDIDATES: [(ResourceKind, ResourceKind, ResourceKind); 10] = [
-            (Red, Yellow, Blue),
-            (Red, Yellow, White),
-            (Red, Yellow, Brown),
+            (Red, Green, Blue),
+            (Red, Green, White),
+            (Red, Green, Black),
             (Red, Blue, White),
-            (Red, Blue, Brown),
-            (Red, White, Brown),
-            (Yellow, Blue, White),
-            (Yellow, Blue, Brown),
-            (Yellow, White, Brown),
-            (Blue, Brown, White),
+            (Red, Blue, Black),
+            (Red, White, Black),
+            (Green, Blue, White),
+            (Green, Blue, Black),
+            (Green, White, Black),
+            (Blue, Black, White),
         ];
         CANDIDATES.into_iter()
     }

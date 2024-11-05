@@ -6,7 +6,7 @@ edition = "2021"
 [workspace]
 members = [
     "random-agent",
-    "game-def",
+    "game-def", "alpha-beta-agent",
 ]
 
 [dependencies]
@@ -14,3 +14,4 @@ game-def = { path = "./game-def" }
 enum-map = { version = "2.7.3", features = ["serde"] }
 clap-repl = "0.3.0"
 serde_json = "1.0.132"
+rand = "0.8.5"
