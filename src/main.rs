@@ -5,7 +5,7 @@ use std::{
 
 use clap_repl::ReadCommandOutput;
 use enum_map::enum_map;
-use game_def::{Action, Card, Player, ResourceKind, ResourceMap, State};
+use game_def::{Action, Card, Nobel, Player, ResourceKind, ResourceMap, State};
 use rand::seq::SliceRandom;
 
 enum Agent {
@@ -157,6 +157,10 @@ fn main() {
             (5, "7g+3r"),
         ],
     ];
+    let mut nobels = vec![
+        "4r+4g", "4u+4w", "4k+4w", "4u+4g", "4k+4r", "3k+3r+3w", "3g+3u+3r", "3g+3u+3w",
+        "3k+3u+3w", "3k+3r+3g",
+    ];
     let decks = [deck0, deck1, deck2];
     let mut agents = std::env::args()
         .skip(1)
@@ -187,14 +191,28 @@ fn main() {
         return;
     }
     let mut state = State {
-        decks: decks.into_iter().map(|d| {
-            let mut r: Vec<Card> = d.into_iter()
-                .flat_map(|(c, l)| l.into_iter().map(move |(s, d)| (c, s, d)))
-                .map(|(c, s, d)| Card::new(c, s, ResourceMap::from_code(d)))
-                .collect();
-            r.shuffle(&mut rand::thread_rng());
-            r
-        }).collect(),
+        decks: decks
+            .into_iter()
+            .map(|d| {
+                let mut r: Vec<Card> = d
+                    .into_iter()
+                    .flat_map(|(c, l)| l.into_iter().map(move |(s, d)| (c, s, d)))
+                    .map(|(c, s, d)| Card::new(c, s, ResourceMap::from_code(d)))
+                    .collect();
+                r.shuffle(&mut rand::thread_rng());
+                r
+            })
+            .collect(),
+        nobels: {
+            nobels.shuffle(&mut rand::thread_rng());
+            nobels[0..agents.len() + 1]
+                .iter()
+                .map(|x| Nobel {
+                    cost: ResourceMap::from_code(x),
+                    score: 3,
+                })
+                .collect()
+        },
         players: agents.iter().map(|a| Player::new(&a.name())).collect(),
         coins: ResourceMap(enum_map! {
             ResourceKind::Red => 7,

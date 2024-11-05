@@ -166,9 +166,16 @@ impl Card {
     }
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Nobel {
+    pub cost: ResourceMap,
+    pub score: u8,
+}
+
 #[derive(Clone, Serialize, Deserialize)]
 pub struct State {
     pub decks: Vec<Vec<Card>>,
+    pub nobels: Vec<Nobel>,
     pub players: Vec<Player>,
     pub coins: ResourceMap,
     pub wilds: usize,
@@ -222,6 +229,14 @@ impl State {
                 player.purchase(&c.cost, &mut self.coins, &mut self.wilds)?;
                 player.immortal.add(&c.adds);
                 player.score += c.score;
+                self.nobels.retain(|nobel| {
+                    if player.immortal.0.iter().all(|(c, v)| *v >= nobel.cost[c]) {
+                        player.score += nobel.score;
+                        false
+                    } else {
+                        true
+                    }
+                });
                 self.decks[deck].remove(card);
                 self.change_player();
             }
@@ -237,6 +252,14 @@ impl State {
                 player.purchase(&c.cost, &mut self.coins, &mut self.wilds)?;
                 player.immortal.add(&c.adds);
                 player.score += c.score;
+                self.nobels.retain(|nobel| {
+                    if player.immortal.0.iter().all(|(c, v)| *v >= nobel.cost[c]) {
+                        player.score += nobel.score;
+                        false
+                    } else {
+                        true
+                    }
+                });
                 self.change_player();
             }
             Action::Reserve { deck, card } => {
@@ -276,6 +299,7 @@ impl State {
                 }
             }
         }
+        println!("Nobels: {:?}", self.nobels);
         println!("Coins: {:?}", self.coins);
         for p in &self.players {
             println!("{}:", p.display_name);
